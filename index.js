@@ -13,7 +13,7 @@ class Rating {
       stroke: '#000000',
       ratedStroke: '#666666',
       unratedStroke: '#666666',
-      strokeWidth: 2,
+      strokeWidth: 0,
       orientation: 'LtoR',
       justifyContent: 'start',
       alignItems: 'start',
@@ -443,14 +443,6 @@ class Rating {
         }
       }
       this._svg.orientation = this._newSvg.orientation
-    }
-
-    if(this._newSvg.justifyContent){
-
-    }
-
-    if(this._newSvg.alignItems){
-      
     }
 
     if(this._newSvg.onDraw){

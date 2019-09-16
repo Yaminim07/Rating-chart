@@ -7,45 +7,51 @@
   </head>
   <body>
     <div id="svg-container"></div>
+    <button onclick="stressTest()">Stress Test</button>
+    <button onclick="drawTime()">Draw time</button>
     <script>
       var container = document.getElementById('svg-container')
-      // var newRating = new Rating(container, {})
-      // var T = 1; var startTime = ((new Date()).getTime() * 1); var time = 0; var colors = ['#ff0', '#f00', '#0f0', '#000']
-      // while (time < 100) {
-      //   newRating.update({
-      //     width: String(400 + ((T * 100) % 400)),
-      //     height: String(400 + ((T * 100) % 400)),
-      //     rating: (4.5 + T + 1) % ((5 + T)% 10 + 1),
-      //     noOfStars: (5 + T) % 10 + 1,
-      //     ratedFill: colors[T % 4]
-      //   })
-      //   time = ((new Date()).getTime() * 1) - startTime
-      //   T++
-      // }
-      // console.log(T + ' tests in ' + time + 'ms')
 
+      function stressTest(){
+        var newRating = new Rating(container, {})
+        var T = 1; var startTime = ((new Date()).getTime() * 1); var time = 0; var colors = ['#ff0', '#f00', '#0f0', '#000']
+        while (time < 100) {
+          newRating.update({
+            width: String(400 + ((T * 100) % 400)),
+            height: String(400 + ((T * 100) % 400)),
+            rating: (((4.5 + T) % 10) + 1) % (((5 + T) % 10) + 1),
+            noOfStars: (5 + T) % 10 + 1,
+            ratedFill: colors[T % 4]
+          })
+          time = ((new Date()).getTime() * 1) - startTime
+          T++
+        }
+        console.log(T + ' tests in ' + time + 'ms')
+      }
 
+      function drawTime(){
+        var rating = new Rating(container, {})
+        let startTime, time = 0, colors = ['#ff0', '#f00', '#0f0', '#000'], calledDraw = 0;
+        rating._svg.onPredraw = function () {
+          startTime = ((new Date()).getTime() * 1);
+        }
+        rating._svg.onDraw = function () {
+        calledDraw++;
+        time += ((new Date()).getTime() * 1) - startTime;
+        if (calledDraw < 100) {
+          rating.update({
+            width : 400 + ((calledDraw * 100) % 400),
+            height : 400 + ((calledDraw * 100) % 400),
+            rating : (((4.5 + calledDraw) % 10) + 1) % (((5 + calledDraw) % 10) + 1),
+            noOfStars : ((5 + calledDraw) % 10) + 1,
+            ratedFill : colors[calledDraw % 4]
+          });
+        } else {
+          console.log('Draw done ' + calledDraw + 'time(s) in ' + time + 'ms')
+        }
+      }
+    }
     
-    var rating = new Rating(container, {})
-    let startTime, time = 0, colors = ['#ff0', '#f00', '#0f0', '#000'], calledDraw = 0;
-    rating._svg.onPredraw = function () {
-      startTime = ((new Date()).getTime() * 1);
-    }
-    rating._svg.onDraw = function () {
-    calledDraw++;
-    time += ((new Date()).getTime() * 1) - startTime;
-    if (calledDraw < 100) {
-      rating.update({
-        width : 400 + ((calledDraw * 100) % 400),
-        height : 400 + ((calledDraw * 100) % 400),
-        rating : (((4.5 + calledDraw) % 10) + 1) % (((5 + calledDraw) % 10) + 1),
-        noOfStars : ((5 + calledDraw) % 10) + 1,
-        ratedFill : colors[calledDraw % 4]
-      });
-    } else {
-      console.log('Draw done ' + calledDraw + 'time(s) in ' + time + 'ms')
-    }
-  }
     </script>
   </body>
 </html>
