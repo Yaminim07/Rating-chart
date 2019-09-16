@@ -1,3 +1,5 @@
+var newId = ''
+
 class Rating {
   constructor(container, input) {
     this._svg = {
@@ -38,7 +40,7 @@ class Rating {
     this._defs = {
       container: '',
       grad1: '',
-      grad1Id: 'grad1',
+      grad1Id: '',
       grad1X2: 0,
       grad1Y2: 0
     }
@@ -56,6 +58,10 @@ class Rating {
     this._newSvg = {}
 
     this._svg.container = container
+    if( !input ){
+      window.requestAnimationFrame(() => this._createSvg())
+    }
+
     if (this._validate(input)) {
       if (!this._svg.hasAnimationFrame)
         window.requestAnimationFrame(() => this._createSvg())
@@ -125,7 +131,7 @@ class Rating {
     } else if (obj.rating > this._svg.noOfStars) {
       this._newSvg.rating = this._svg.noOfStars
     }
-    this._newSvg.box = calculateBoxSize(this._svg.width, this._svg.height, this._newSvg.flow, this._newSvg.noOfStars)
+    this._newSvg.box = calculateBoxSize(this._newSvg.width, this._newSvg.height, this._newSvg.flow, this._newSvg.noOfStars)
 
     if (obj.padding && !isNaN(obj.padding) && !(greaterThanMaximumPadding(this._newSvg.box, obj.padding)) && (obj.padding > 0)) {
       this._newSvg.padding = obj.padding
@@ -158,8 +164,8 @@ class Rating {
     this._svg.onPredraw()
 
     this._svg.hasAnimationFrame = true
-    
-    let startWidth, startHeight, increment
+
+    this._svg.box = calculateBoxSize(this._svg.width, this._svg.height, this._svg.flow, this._svg.noOfStars)
 
     if(!this._svg.svgElement){
       let svg = document.createElementNS('http://www.w3.org/2000/svg','svg')
@@ -170,28 +176,28 @@ class Rating {
     }
 
     if(this._svg.stars.length === 0){
-
+      let startWidth, startHeight, increment
       if (this._svg.flow === 'row') { 
         if (this._svg.justifyContent === 'start') {
           startWidth = this._svg.box / 2
           increment = this._svg.box
         } else if (this._svg.justifyContent === 'end') {
-          startWidth = this._svg.box / 2 + (width) - (this._svg.box * this._svg.noOfStars)
+          startWidth = this._svg.box / 2 + (this._svg.width) - (this._svg.box * this._svg.noOfStars)
           increment = this._svg.box
         } else if (this._svg.justifyContent === 'center') {
-          startWidth = this._svg.box / 2 + ((width) - (this._svg.box * this._svg.noOfStars)) / 2
+          startWidth = this._svg.box / 2 + ((this._svg.width) - (this._svg.box * this._svg.noOfStars)) / 2
           increment = this._svg.box
         } else {
-          startWidth = this._svg.box / 2 + (width - (this._svg.box * this._svg.noOfStars)) / (this._svg.noOfStars)
-          increment = this._svg.box + (width - (this._svg.box * this._svg.noOfStars)) / (this._svg.noOfStars)
+          startWidth = this._svg.box / 2 + (this._svg.width - (this._svg.box * this._svg.noOfStars)) / (this._svg.noOfStars)
+          increment = this._svg.box + (this._svg.width - (this._svg.box * this._svg.noOfStars)) / (this._svg.noOfStars)
         }
   
         if (this._svg.alignItems === 'start') {
           startHeight = this._svg.padding
         } else if (this._svg.alignItems === 'center') {
-          startHeight = this._svg.padding + (height - this._svg.box) / 2
+          startHeight = this._svg.padding + (this._svg.height - this._svg.box) / 2
         } else {
-          startHeight = this._svg.padding + (height - this._svg.box)
+          startHeight = this._svg.padding + (this._svg.height - this._svg.box)
         }
       }
 
@@ -200,22 +206,22 @@ class Rating {
           startWidth = this._svg.box / 2
           increment = this._svg.box
         } else if (this._svg.justifyContent === 'end') {
-          startWidth = this._svg.box / 2 + (width) - (this._svg.box * this._svg.noOfStars)
+          startWidth = this._svg.box / 2 + (this._svg.width) - (this._svg.box * this._svg.noOfStars)
           increment = this._svg.box
         } else if (this._svg.justifyContent === 'center') {
-          startWidth = this._svg.box / 2 + ((width) - (this._svg.box * this._svg.noOfStars)) / 2
+          startWidth = this._svg.box / 2 + ((this._svg.width) - (this._svg.box * this._svg.noOfStars)) / 2
           increment = this._svg.box
         } else {
-          startWidth = this._svg.box / 2 + (width - (this._svg.box * this._svg.noOfStars)) / (this._svg.noOfStars)
-          increment = this._svg.box + (width - (this._svg.box * this._svg.noOfStars)) / (this._svg.noOfStars)
+          startWidth = this._svg.box / 2 + (this._svg.width - (this._svg.box * this._svg.noOfStars)) / (this._svg.noOfStars)
+          increment = this._svg.box + (this._svg.width - (this._svg.box * this._svg.noOfStars)) / (this._svg.noOfStars)
         }
   
         if (this._svg.alignItems === 'start') {
           startHeight = (this._svg.padding)
         } else if (this._svg.alignItems === 'center') {
-          startHeight = (this._svg.padding) + (height - (this._svg.box * this._svg.noOfStars)) / 2
+          startHeight = (this._svg.padding) + (this._svg.height - (this._svg.box * this._svg.noOfStars)) / 2
         } else {
-          startHeight = (this._svg.padding) + (height - (this._svg.box * this._svg.noOfStars))
+          startHeight = (this._svg.padding) + (this._svg.height - (this._svg.box * this._svg.noOfStars))
         }
       }
 
@@ -225,10 +231,12 @@ class Rating {
         let d = this._dAttr(startWidth, startHeight)
         let fillColor, strokeColor;
         if(i < rated){
-          fillColor = this._svg.ratedFill, strokeColor = this._svg.ratedStroke
+          fillColor = this._svg.ratedFill
+          strokeColor = this._svg.ratedStroke
         }
         else{
-          fillColor = this._svg.unratedFill, strokeColor = this._svg.unratedStroke
+          fillColor = this._svg.unratedFill
+          strokeColor = this._svg.unratedStroke
         }
         path.setAttribute('d', d)
         path.setAttribute('fill', fillColor)
@@ -259,7 +267,7 @@ class Rating {
 
       if(fracRating){
         if(gradientStar < this._svg.noOfStars){
-          this._svg.stars[gradientStar].elem.setAttribute('fill', 'url(#grad1)')
+          this._svg.stars[gradientStar].elem.setAttribute('fill', 'url(#' + this._defs.grad1Id + ')')
         }
 
       }
@@ -304,7 +312,9 @@ class Rating {
           let path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
           let pObject = {}
           let d 
-          xShift = 0, yShift = 0,inc = this._svg.stars[i-1].increment;
+          xShift = 0 
+          yShift = 0
+          inc = this._svg.stars[i-1].increment
           if(this._svg.flow === 'row')
           xShift = this._svg.stars[i-1].startWidth + this._svg.stars[i-1].increment
           else
@@ -403,7 +413,7 @@ class Rating {
         this._defs.grad1.offset1 = offset
         this._defs.grad1.offset2 = (100 - offset)
         if(Math.trunc(this._newSvg.rating))
-        this._svg.stars[Math.trunc(this._newSvg.rating)].elem.setAttribute('fill', 'url(#grad1)')
+        this._svg.stars[Math.trunc(this._newSvg.rating)].elem.setAttribute('fill', 'url(#' + this._defs.grad1Id + ')')
       }  
       this._svg.rating = this._newSvg.rating
     }
@@ -445,6 +455,93 @@ class Rating {
       this._svg.orientation = this._newSvg.orientation
     }
 
+    if(this._newSvg.justifyContent){
+      if(this._newSvg.justifyContent === 'start'){
+        let sW = this._svg.box / 2
+        for(let i = 0;i < this._svg.stars.length; i++){
+          this._svg.stars[i].startWidth = sW
+          let d = this._dAttr(this._svg.stars[i].startWidth, this._svg.stars[i].startHeight)
+          this._svg.stars[i].elem.setAttribute('d', d)
+          sW += this._svg.stars[i].increment
+        }
+      }
+
+      else if(this._newSvg.justifyContent === 'end'){
+        let sW = this._svg.box / 2 
+        if(this._svg.flow === 'row')
+        sW += (this._svg.width) - (this._svg.box) * (this._svg.noOfStars)
+        else
+        sW += (this._svg.width) - (this._svg.box)
+        for(let i = 0;i < this._svg.stars.length; i++){
+          this._svg.stars[i].startWidth = sW
+          let d = this._dAttr(this._svg.stars[i].startWidth, this._svg.stars[i].startHeight)
+          this._svg.stars[i].elem.setAttribute('d', d)
+          sW += this._svg.stars[i].increment
+        }
+      }
+
+      else if(this._newSvg.justifyContent === 'center'){
+        let sW = this._svg.box / 2 
+        if(this._svg.flow === 'row')
+        sW += ((this._svg.width) - (this._svg.box) * (this._svg.noOfStars)) / 2
+        else
+        sW += ((this._svg.width) - (this._svg.box)) / 2
+        for(let i = 0;i < this._svg.stars.length; i++){
+          this._svg.stars[i].startWidth = sW
+          let d = this._dAttr(this._svg.stars[i].startWidth, this._svg.stars[i].startHeight)
+          this._svg.stars[i].elem.setAttribute('d', d)
+          sW += this._svg.stars[i].increment
+        }
+      }
+
+      else{
+        sW = (this._svg.width - (this._svg.box * this._svg.noOfStars)) / (this._svg.noOfStars)
+        inc += (this._svg.width - (this._svg.box * this._svg.noOfStars)) / (this._svg.noOfStars)
+        for(let i = 0;i < this._svg.stars.length; i++){
+          this._svg.stars[i].startWidth = sW
+          this._svg.stars[i].increment = inc
+          let d = this._dAttr(this._svg.stars[i].startWidth, this._svg.stars[i].startHeight)
+          this._svg.stars[i].elem.setAttribute('d', d)
+          sW += this._svg.stars[i].increment
+        }
+      }
+
+      this._svg.justifyContent = this._newSvg.justifyContent
+    }
+
+    if(this._newSvg.alignItems){
+      if(this._newSvg.alignItems === 'start'){
+        let sH = 0
+        for(let i = 0;i < this._svg.stars.length; i++){
+          this._svg.stars[i].startHeight = sH
+          let d = this._dAttr(this._svg.stars[i].startWidth, this._svg.stars[i].startHeight)
+          this._svg.stars[i].elem.setAttribute('d', d)
+          sH += this._svg.box
+        }
+      }
+
+      else if(this._newSvg.alignItems === 'end'){
+        let sH = this._svg.height - (this._svg.box * this._svg.noOfStars)
+        for(let i = 0;i < this._svg.stars.length; i++){
+          this._svg.stars[i].startHeight = sH
+          let d = this._dAttr(this._svg.stars[i].startWidth, this._svg.stars[i].startHeight)
+          this._svg.stars[i].elem.setAttribute('d', d)
+          sH += this._svg.box
+        }
+      }
+
+      else if(this._newSvg.alignItems === 'center'){
+        let sH = (this._svg.height - (this._svg.box * this._svg.noOfStars)) / 2
+        for(let i = 0;i < this._svg.stars.length; i++){
+          this._svg.stars[i].startHeight = sH
+          let d = this._dAttr(this._svg.stars[i].startWidth, this._svg.stars[i].startHeight)
+          this._svg.stars[i].elem.setAttribute('d', d)
+          sH += this._svg.box
+        }
+      }
+      this._svg.alignItems = this._newSvg.alignItems
+    }
+
     if(this._newSvg.onDraw){
       this._svg.onDraw = this._newSvg.onDraw
     }
@@ -460,14 +557,15 @@ class Rating {
 
   _createGradient(fracRating){
     this._defs.container = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
+    this._defs.grad1Id = newId + 1
+    newId = this._defs.grad1Id
     let gradContainer = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient')
     let stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop')
     let stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop')
-    gradContainer.setAttribute('id', 'grad1')
+    gradContainer.setAttribute('id', this._defs.grad1Id)
     gradContainer.appendChild(stop1)
     gradContainer.appendChild(stop2)
     this._defs.container.appendChild(gradContainer)
-    this._defs.grad1Id = 'grad1'
     let grad1 = {}
     grad1.container = gradContainer
     grad1.stop1 = stop1 
