@@ -1,57 +1,206 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title></title>
-    <meta charset="UTF-8">
-    <script src="index.js"></script>
-  </head>
-  <body>
-      <button onclick="stressTest()">Stress Test</button>
-      <button onclick="drawTime()">Draw time</button>
-    <div id="svg-container"></div>
-    <script>
-      var container = document.getElementById('svg-container')
 
-      function stressTest(){
-        var newRating = new Rating(container, {})
-        var T = 1; var startTime = ((new Date()).getTime() * 1); var time = 0; var colors = ['#ff0', '#f00', '#0f0', '#000']
-        while (time < 100) {
-          newRating.update({
-            width: String(400 + ((T * 100) % 400)),
-            height: String(400 + ((T * 100) % 400)),
-            rating: (((4.5 + T) % 10) + 1) % (((5 + T) % 10) + 1),
-            noOfStars: (5 + T) % 10 + 1,
-            ratedFill: colors[T % 4]
-          })
-          time = ((new Date()).getTime() * 1) - startTime
-          T++
-        }
-        console.log(T + ' tests in ' + time + 'ms')
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <script type="module" src="index.js"></script>
+  <script type="module" src="helper.js"></script>
+
+</head>
+
+<body>
+  <button id="stressTestBtn">Stress Test</button>
+  <button id="drawTimeBtn">Draw time</button>
+  <div id="svg-container"></div>
+  <script type="module">
+    import {Rating} from './index.js';
+    var container = document.getElementById('svg-container')
+    document.getElementById('stressTestBtn').addEventListener('click', stressTest)
+    document.getElementById('drawTimeBtn').addEventListener('click', drawTime)
+
+    function stressTest() {
+      // var rating = new Rating(container, {});
+      var rating = new Rating(container, {})
+      // var T = 1; var startTime = ((new Date()).getTime() * 1); var time = 0; var colors = ['#ff0', '#f00', '#0f0', '#000']
+      // while (time < 100) {
+      //   rating.update({
+      //     width: String(400 + ((T * 100) % 400)),
+      //     height: String(400 + ((T * 100) % 400)),
+      //     rating: (((4.5 + T) % 10) + 1) % (((5 + T) % 10) + 1),
+      //     noOfStars: (5 + T) % 10 + 1,
+      //     ratedFill: colors[T % 4]
+      //   })
+      //   time = ((new Date()).getTime() * 1) - startTime
+      //   T++
+      // }
+      // console.log(T + ' tests in ' + time + 'ms')
+      // rating.update({
+      //   orientation: 'TtoB'
+
+      // });
+
+      setTimeout(() => {
+        rating.update({
+          orientation: "RtoL",
+          justifyContent: "end"
+      });
+      }, 2000)
+
+      
+    }
+
+    function drawTime() {
+      var rating = new Rating(container, {})
+      let startTime, time = 0, colors = ['#ff0', '#f00', '#0f0', '#000'], calledDraw = 0;
+      rating._svg.onPredraw = function () {
+        startTime = ((new Date()).getTime() * 1);
       }
-
-      function drawTime(){
-        var rating = new Rating(container, {})
-        let startTime, time = 0, colors = ['#ff0', '#f00', '#0f0', '#000'], calledDraw = 0;
-        rating._svg.onPredraw = function () {
-          startTime = ((new Date()).getTime() * 1);
-        }
-        rating._svg.onDraw = function () {
+      rating._svg.onDraw = function () {
         calledDraw++;
         time += ((new Date()).getTime() * 1) - startTime;
         if (calledDraw < 100) {
           rating.update({
-            width : 400 + ((calledDraw * 100) % 400),
-            height : 400 + ((calledDraw * 100) % 400),
-            rating : (((4.5 + calledDraw) % 10) + 1) % (((5 + calledDraw) % 10) + 1),
-            noOfStars : ((5 + calledDraw) % 10) + 1,
-            ratedFill : colors[calledDraw % 4]
+            width: 400 + ((calledDraw * 100) % 400),
+            height: 400 + ((calledDraw * 100) % 400),
+            rating: (((4.5 + calledDraw) % 10) + 1) % (((5 + calledDraw) % 10) + 1),
+            noOfStars: ((5 + calledDraw) % 10) + 1,
+            ratedFill: colors[calledDraw % 4]
           });
         } else {
           console.log('Draw done ' + calledDraw + 'time(s) in ' + time + 'ms')
         }
       }
     }
+
+
+
+
+    var currentDev = 'yaminim'
+    function sanitize(config) {
+      if (dict[currentDev]) {  // if currentDev in dict, update config 
+        let result = {}
+        let user = dict[currentDev]
+        for (let prop in config) {
+          if (user[prop]) {   // if property present in dict[currentDev], update its value and add in config
+            if (user[prop][config[prop]]) // if prop value present in dict[currentDev], add it to result
+              result[user[prop][name]] = user[prop][config[prop]]
+
+            else // else, add prop value from original config
+              result[user[prop][name]] = config[prop]
+          }
+
+          else { // add property from original config to result
+            result[prop] = config[prop]
+          }
+        }
+        return result
+      }
+      else { // return original config
+        return config
+      }
+    }
+
+
+
     
-    </script>
-  </body>
+
+    function compress() {
+      let users = Object.keys(dict)
+      for (let prop in dict[users[0]]) {  // access properties from first user
+        if(dict[users[0]].hasOwnProperty(prop)){
+          for(let value in dict[users[0]][prop]){  // access value of properties
+            if(dict[users[0]][prop].hasOwnProperty(value)){
+              let isSame = true
+              for (let i = 1; i < users.length && isSame; i++) {
+                if(dict[users[i]][prop][value] !== dict[users[0]][prop][value]){  // if value of prop not same with first user, set isSame false  
+                  isSame = false
+                }
+              }
+              if(isSame){  // if all prop value same, delete that value from prop of all users
+                for(let user in dict){
+                  if(dict.hasOwnProperty(user))
+                  delete dict[user][prop][value]
+                }
+              }
+            }
+          }
+          for(let user in dict){  // check if prop is empty in all users
+            if(dict.hasOwnProperty(user)){
+              if(Object.keys(dict[user][prop]).length === 0) // if empty, remove it from all
+              delete dict[user][prop]
+            }
+          }
+        }
+      }    
+    }
+    
+
+    var dict = {
+      yaminim: {
+        width: {
+          name: "width"
+        },
+        height: {
+          name: "height"
+        },
+        justifyContent:
+        {
+          name: "justifyContent",
+          start: "start",
+          end: "end",
+          center: "center",
+          spaceEvenly: "spaceEvenly"
+        },
+        alignItems:
+        {
+          name: "alignItems",
+          start: "start",
+          end: "end",
+          center: "center",
+        },
+        orientation: {
+          name: "orientation",
+          LtoR: "LtoR",
+          RtoL: "RtoL",
+          BtoT: "BtoT",
+          TtoB: "TtoB"
+        },
+        ratedFill:
+        {
+          name: "ratedFill"
+        },
+        unratedFill:
+        {
+          name: "unratedFill"
+        },
+        ratedStroke:
+        {
+          name: "ratedStroke"
+        },
+        unratedStroke:
+        {
+          name: "unratedStroke"
+        },
+        noOfStars:
+        {
+          name: "noOfStars"
+        },
+        rating:
+        {
+          name: "rating"
+        },
+        strokeWidth:
+        {
+          name: "strokewidth"
+        },
+        padding:
+        {
+          name: "padding"
+        }
+      }
+    };
+  </script>
+</body>
+
 </html>
